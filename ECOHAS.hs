@@ -49,4 +49,15 @@ complemento :: Grafo -> Grafo
 complemento [] = []
 complemento ((v,l):t) = (v,diferenca vertices (v:l)):complemento(t)
 
+repetidos :: [Int] -> Bool
+repetidos [] = False
+repetidos (h:t) | h `elem` t = True
+                |otherwise = repetidos(t)
+
+multigrafo :: Grafo -> Bool
+multigrafo [] = False
+multigrafo ((v,l):t) | v `elem` l = True
+                     | repetidos(l) = True
+                     |otherwise = multigrafo(t)
+
 main = print grafo
