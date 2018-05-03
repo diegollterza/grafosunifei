@@ -59,5 +59,23 @@ multigrafo [] = False
 multigrafo ((v,l):t) | v `elem` l = True
                      | repetidos(l) = True
                      |otherwise = multigrafo(t)
+                     
+buscaProf :: Grafo -> Int -> Grafo
+buscaProf g v = buscaAux g [v] []
+
+contem :: Int -> Grafo -> Bool
+contem _ [] = False
+contem v ((h,l):t)  | v == h = True
+                | otherwise = contem v t
+
+vizinhos :: Grafo -> Int -> [Int] -> [Int]
+vizinhos [] _ _ = []
+vizinhos ((v,l):g) v2 l2  | v == v2 = diferenca l l2
+                          | otherwise = vizinhos g v2 l2
+
+buscaAux :: Grafo -> [Int] -> [Int] -> Grafo
+buscaAux _ [] _ = []
+buscaAux (v2:g) (v:h) l | contem v (v2:g) = buscaAux (v2:g) (vizinhos (v2:g) v (v:l)) (v:l)
+                        |otherwise = []
 
 main = print grafo
