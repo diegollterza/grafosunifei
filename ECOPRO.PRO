@@ -1,3 +1,16 @@
+
+/* 	
+
+
+
+
+	Nome: Diego La Terza Pinelli Ferreira
+	Professor: Edmilson Marmo Moreira
+ */
+
+
+
+
 Domains
 
 listaInt=integer*
@@ -11,8 +24,8 @@ montaNo(integer, no).
 montaGrafo(integer, grafo).
 grau(listaInt,integer).
 regular(grafo).
-buscaProf(grafo,integer).
-buscaPAux(grafo,listaInt,listaInt).
+buscaProf(grafo,integer, listaInt).
+buscaPAux(grafo,listaInt,listaInt,listaInt).
 temAresta(integer, integer).
 aresta(integer, integer).
 vizinhos(grafo,integer,listaInt).
@@ -32,6 +45,8 @@ criaComplemento(grafo,listaInt,grafo).
 multigrafo(grafo).
 temLaco(grafo).
 temDuplaAresta(grafo).
+componentesConex(grafo,integer).
+removeVertices(grafo, listaInt, grafo).
 
 Clauses
 
@@ -63,15 +78,14 @@ regular([no(_,Adj1),no(V,Adj2)|Cauda]):-
 grau(Adj1,T),grau(Adj2,T),
 regular([no(V,Adj2)|Cauda]).
 
-buscaProf(G,V) :-
-buscaPAux(G,[V],[]).
+buscaProf(G,V,L) :-
+buscaPAux(G,[V],[],L).
 
-buscaPAux(_,[],_):- !.
-buscaPAux(G,[V|Pilha],S):-
-write(V), nl,
+buscaPAux(_,[],_,[]):- !.
+buscaPAux(G,[V|Pilha],S,[V|T]):-
 vizinhos(G,V,Adj),
 insereAdj(Pilha,Adj,NovaPilha,[V|S],SModif),
-buscaPAux(G,NovaPilha,SModif).
+buscaPAux(G,NovaPilha,SModif,T).
 
 vizinhos([no(X,Adj)|_],X,Adj):-!.
 vizinhos([_|Cauda],X,Adj):-Vizinhos(Cauda,X,Adj).
@@ -107,18 +121,22 @@ euleriano(_):- write("Nao Euleriano"), nl.
 listaVertices([],[]).
 listaVertices([no(V,_)|T],[V|T2]):- listaVertices(T,T2). 
 
+%	soh verifiquei que havia a funcao pertence depois de copiar a busca das notas de aula
 membro([H|_],H).
 membro([_|T],H):- membro(T,H).
 
+%	diferenca lista 1 - lista 2
 diferenca([],_,[]).
 diferenca([H|T],L,R):- membro(L,H), !, diferenca(T,L,R).
 diferenca([H|T],L,[H|T2]):- diferenca(T,L,T2).
 
+% 	gera o complemento de um grafo
 criaComplemento([],_,[]).
 criaComplemento([no(V,L1)|T1], L2, [no(V,L3)|T2]):- criaComplemento(T1,L2,T2), diferenca(L2,[V|L1],L3).
 
 complemento(G,G2):- listaVertices(G,L), criaComplemento(G,L,G2). 
 
+%	verifica a ocorrencia de lacos
 temLaco([no(V,L)|_]):- membro(L,V).
 temLaco([_|T]):- temLaco(T).
 
@@ -127,3 +145,11 @@ temDuplaAresta([_|T]):- temDuplaAresta(T).
 
 multigrafo(G):- temLaco(G); temDuplaAresta(G), write("Multigrafo"), nl, !.
 multigrafo(_):- write("Nao Multigrafo"), nl.
+
+%	remove vertices do grafo pela lista dada
+removeVertices([],_,[]).
+removeVertices([no(V,_)|G],L2,T):- membro(L2,V),!, removeVertices(G,L2,T).
+removeVertices([no(V,L)|G],L2,[no(V,L)|T]):- removeVertices(G,L2,T).
+
+componentesConex([],0).
+componentesConex([no(V,L)|T], N):- buscaProf([no(V,L)|T], V, L2), removeVertices([no(V,L)|T], L2, G), componentesConex(G, N2), N = N2 + 1.
