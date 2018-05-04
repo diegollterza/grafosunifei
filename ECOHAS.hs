@@ -60,8 +60,8 @@ multigrafo ((v,l):t) | v `elem` l = True
                      | repetidos(l) = True
                      |otherwise = multigrafo(t)
                      
-buscaProf :: Grafo -> Int -> Grafo
-buscaProf g v = buscaAux g [v] []
+buscaLarg :: Grafo -> Int -> Grafo
+buscaLarg g v = buscaAux g [v] []
 
 contem :: Int -> Grafo -> Bool
 contem _ [] = False
@@ -73,9 +73,25 @@ vizinhos [] _ _ = []
 vizinhos ((v,l):g) v2 l2  | v == v2 = diferenca l l2
                           | otherwise = vizinhos g v2 l2
 
+verticeEm :: Int -> Grafo -> Vertice
+verticeEm v ((v2,l):t)  | v == v2 = (v2,l)
+                        | otherwise = verticeEm v t
+                        
+uniao :: [Int] -> [Int] -> [Int]
+uniao [] l = l
+uniao (h:t) l | h `elem` l = h:diferenca (uniao t l) [h]
+              | otherwise = h:uniao t l
+
 buscaAux :: Grafo -> [Int] -> [Int] -> Grafo
 buscaAux _ [] _ = []
-buscaAux (v2:g) (v:h) l | contem v (v2:g) = buscaAux (v2:g) (vizinhos (v2:g) v (v:l)) (v:l)
+buscaAux g (v:h) l | contem v g = verticeEm v g :buscaAux g (uniao h (vizinhos g v (v:l))) (v:l)
+                        |otherwise = []
+buscaProf :: Grafo -> Int -> Grafo
+buscaProf g v = buscaAux2 g [v] []
+
+buscaAux2 :: Grafo -> [Int] -> [Int] -> Grafo
+buscaAux2 _ [] _ = []
+buscaAux2 g l1 l | contem (last l1) g = verticeEm (last l1) g :buscaAux2 g (uniao (init l1) (vizinhos g (last l1) (last l1:l))) (last l1:l)
                         |otherwise = []
 
 main = print grafo
